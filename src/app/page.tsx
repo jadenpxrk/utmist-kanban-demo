@@ -9,10 +9,9 @@ import {
   useSensor,
   PointerSensor,
   useDraggable,
-  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
-  type DragCancelEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -36,10 +35,23 @@ import { AppSidebar } from "@/components/base/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SidebarInset } from "@/components/ui/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { ModeToggle } from "@/components/base/mode-toggle";
 
 // Types
 interface Task {
@@ -162,20 +174,34 @@ export default function KanbanBoard() {
     setActiveTask(null);
   }
 
-  function handleDragCancel(_event: DragCancelEvent): void {
+  function handleDragCancel(): void {
     setActiveTask(null);
   }
 
   return (
-    <div className="h-screen grid lg:grid-cols-[280px_1fr]">
-      {/* Sidebar */}
-      <SidebarProvider>
-        <AppSidebar />
-      </SidebarProvider>
+    <SidebarProvider>
+      <AppSidebar />
 
       <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-6 w-full">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">Kanban Board</BreadcrumbLink>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div className="flex items-center gap-2 ml-auto">
+              <ModeToggle />
+            </div>
+          </div>
+        </header>
+
         {/* Main Content */}
-        <main className="h-full p-6">
+        <main className="h-full w-full p-6">
           {/* Header */}
           <header className="mb-6">
             <div className="flex items-center gap-4">
@@ -423,7 +449,7 @@ export default function KanbanBoard() {
           </DndContext>
         </main>
       </SidebarInset>
-    </div>
+    </SidebarProvider>
   );
 }
 

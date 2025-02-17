@@ -136,17 +136,20 @@ export default function KanbanBoard() {
 
   function handleDragStart(event: DragStartEvent): void {
     const { active } = event;
-    setActiveTask(active.data.current.task);
+    if (active.data.current) {
+      setActiveTask(active.data.current.task);
+    }
   }
 
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
-    if (over && active.data.current.column !== over.id) {
+    const activeData = active.data.current;
+    if (activeData && over && activeData.column !== over.id) {
       setColumns((prev) => {
-        const sourceCol = active.data.current.column;
-        const task = active.data.current.task as Task;
+        const sourceCol = activeData.column as keyof Tasks;
+        const task = activeData.task as Task;
         const newSource = prev[sourceCol].filter(
-          (t) => `task-${t.id}` !== active.id
+          (t: Task) => `task-${t.id}` !== active.id
         );
         const targetCol = over.id as keyof Tasks;
         return {
@@ -159,7 +162,7 @@ export default function KanbanBoard() {
     setActiveTask(null);
   }
 
-  function handleDragCancel(event: DragCancelEvent): void {
+  function handleDragCancel(_event: DragCancelEvent): void {
     setActiveTask(null);
   }
 
@@ -450,15 +453,12 @@ interface DraggableTaskProps {
 }
 
 function DraggableTask({ task, column }: DraggableTaskProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useDraggable({
-      id: `task-${task.id}`,
-      data: { task, column },
-    });
-
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: `task-${task.id}`,
+    data: { task, column },
+  });
   const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
+    transform: transform ? CSS.Translate.toString(transform) : undefined,
   };
 
   return (

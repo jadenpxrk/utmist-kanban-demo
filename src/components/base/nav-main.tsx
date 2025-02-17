@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Collapsible } from "@/components/ui/collapsible";
+import { type LucideIcon } from "lucide-react";
 
 export function NavMain({
   items,

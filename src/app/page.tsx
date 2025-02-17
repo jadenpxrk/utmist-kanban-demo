@@ -1,101 +1,448 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import * as React from "react";
+import { useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  useSensors,
+  useSensor,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragCancelEvent,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Check, Filter, Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AppSidebar } from "@/components/base/app-sidebar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@radix-ui/react-dropdown-menu";
+
+// Types
+interface Task {
+  id: number;
+  title: string;
+  type: string;
+  priority: "low" | "medium" | "high";
+  assignee: {
+    image: string;
+    name: string;
+  };
+}
+
+interface Tasks {
+  todo: Task[];
+  inProgress: Task[];
+  complete: Task[];
+}
+
+// Dummy data for tasks
+const initialTasks: Tasks = {
+  todo: [
+    {
+      id: 1,
+      title: "Implement authentication",
+      type: "Feature",
+      priority: "high",
+      assignee: {
+        image: "/avatars/01.png",
+        name: "JD",
+      },
+    },
+  ],
+  inProgress: [
+    {
+      id: 2,
+      title: "Design system updates",
+      type: "Design",
+      priority: "medium",
+      assignee: {
+        image: "/avatars/02.png",
+        name: "AS",
+      },
+    },
+  ],
+  complete: [
+    {
+      id: 3,
+      title: "Bug fixes in login",
+      type: "Bug",
+      priority: "low",
+      assignee: {
+        image: "/avatars/03.png",
+        name: "RK",
+      },
+    },
+  ],
+};
+
+export default function KanbanBoard() {
+  const [columns, setColumns] = useState<Tasks>(initialTasks);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [selectedAssignees, setSelectedAssignees] = useState<
+    Array<{ id: number; name: string; image: string }>
+  >([]);
+  const placeholderAssignees = [
+    { id: 1, name: "John Doe", image: "/avatars/01.png" },
+    { id: 2, name: "Alice Smith", image: "/avatars/02.png" },
+    { id: 3, name: "Robert King", image: "/avatars/03.png" },
+    { id: 4, name: "Jaden Park", image: "/avatars/04.png" },
+    { id: 5, name: "Tom Zhang", image: "/avatars/05.png" },
+  ];
+  const [assigneeSearch, setAssigneeSearch] = useState("");
+  const filteredAssignees = placeholderAssignees.filter((assignee) =>
+    assignee.name.toLowerCase().includes(assigneeSearch.toLowerCase())
+  );
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handleDragStart(event: DragStartEvent): void {
+    const { active } = event;
+    setActiveTask(active.data.current.task);
+  }
+
+  function handleDragEnd(event: DragEndEvent): void {
+    const { active, over } = event;
+    if (over && active.data.current.column !== over.id) {
+      setColumns((prev) => {
+        const sourceCol = active.data.current.column;
+        const task = active.data.current.task as Task;
+        const newSource = prev[sourceCol].filter(
+          (t) => `task-${t.id}` !== active.id
+        );
+        const targetCol = over.id as keyof Tasks;
+        return {
+          ...prev,
+          [sourceCol]: newSource,
+          [targetCol]: [...prev[targetCol], task],
+        };
+      });
+    }
+    setActiveTask(null);
+  }
+
+  function handleDragCancel(event: DragCancelEvent): void {
+    setActiveTask(null);
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="h-screen grid lg:grid-cols-[280px_1fr]">
+      {/* Sidebar */}
+      <SidebarProvider>
+        <AppSidebar />
+      </SidebarProvider>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <SidebarInset>
+        {/* Main Content */}
+        <main className="h-full p-6">
+          {/* Header */}
+          <header className="mb-6">
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold">Kanban Board</h1>
+              <div className="flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-md">
+                <Check className="h-4 w-4 text-[#0133a0]" />
+                <span className="text-sm text-[#0133a0]">Saved</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Controls */}
+          <div className="mb-6 flex items-center gap-4">
+            <div className="relative w-[300px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+              <Input className="pl-9" placeholder="Search issues..." />
+            </div>
+            <Select>
+              <SelectTrigger className="w-[140px]">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0133a0] hover:bg-[#0133a0]/90">
+                  Create Issue
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-full max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create New Issue</DialogTitle>
+                </DialogHeader>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left Column: Title and Description */}
+                    <div className="flex flex-col h-full gap-4">
+                      <div>
+                        <Label
+                          id="issueTitle"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Issue Title
+                        </Label>
+                        <Input
+                          id="issueTitle"
+                          placeholder="Enter issue title"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col">
+                        <Label
+                          id="issueDescription"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Description
+                        </Label>
+                        <Textarea
+                          id="issueDescription"
+                          placeholder="Enter issue description"
+                          className="mt-1 flex-1 w-full p-2 border rounded"
+                        />
+                      </div>
+                    </div>
+                    {/* Right Column: Priority, Assignees, and Date */}
+                    <div className="space-y-4">
+                      <div>
+                        <Label
+                          id="issuePriority"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Priority
+                        </Label>
+                        <Select>
+                          <SelectTrigger id="issuePriority" className="mt-1">
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="block text-sm font-medium text-gray-700">
+                          Assignees
+                        </Label>
+                        <div className="relative w-full mt-1">
+                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                          <Input
+                            value={assigneeSearch}
+                            onChange={(e) => setAssigneeSearch(e.target.value)}
+                            placeholder="Search assignees..."
+                            className="pl-9"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 mt-2 h-40 overflow-y-auto">
+                          {filteredAssignees.map((assignee) => (
+                            <div
+                              key={assignee.id}
+                              onClick={() => {
+                                if (
+                                  selectedAssignees.some(
+                                    (a) => a.id === assignee.id
+                                  )
+                                ) {
+                                  setSelectedAssignees(
+                                    selectedAssignees.filter(
+                                      (a) => a.id !== assignee.id
+                                    )
+                                  );
+                                } else {
+                                  setSelectedAssignees([
+                                    ...selectedAssignees,
+                                    assignee,
+                                  ]);
+                                }
+                              }}
+                              className={`cursor-pointer p-2 rounded border ${
+                                selectedAssignees.some(
+                                  (a) => a.id === assignee.id
+                                )
+                                  ? "border-blue-500 bg-blue-100 text-[#0133a0]"
+                                  : "border-gray-300"
+                              }`}
+                            >
+                              {assignee.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <hr className="my-2" />
+                        <time
+                          dateTime={new Date().toISOString()}
+                          className="text-sm text-gray-500"
+                        >
+                          {`Created ${new Date().toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "2-digit",
+                            year: "numeric",
+                          })}`}
+                        </time>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      type="submit"
+                      className="bg-[#0133a0] hover:bg-[#0133a0]/90"
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {/* Kanban Columns */}
+            <div className="grid grid-cols-3 gap-6 h-[calc(100vh-220px)]">
+              <DroppableColumn id="todo" title="TO-DO" tasks={columns.todo} />
+              <DroppableColumn
+                id="inProgress"
+                title="IN PROGRESS"
+                tasks={columns.inProgress}
+              />
+              <DroppableColumn
+                id="complete"
+                title="COMPLETE"
+                tasks={columns.complete}
+              />
+            </div>
+
+            <DragOverlay>
+              {activeTask ? <TaskCard task={activeTask} /> : null}
+            </DragOverlay>
+          </DndContext>
+        </main>
+      </SidebarInset>
+    </div>
+  );
+}
+
+interface DroppableColumnProps {
+  id: keyof Tasks;
+  title: string;
+  tasks: Task[];
+}
+
+function DroppableColumn({ id, title, tasks }: DroppableColumnProps) {
+  const { setNodeRef } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className="bg-gray-50 rounded-lg p-4">
+      <h3 className="font-semibold mb-4">{title}</h3>
+      <ScrollArea className="h-full">
+        {tasks.map((task) => (
+          <DraggableTask key={`task-${task.id}`} task={task} column={id} />
+        ))}
+      </ScrollArea>
+    </div>
+  );
+}
+
+interface DraggableTaskProps {
+  task: Task;
+  column: keyof Tasks;
+}
+
+function DraggableTask({ task, column }: DraggableTaskProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useDraggable({
+      id: `task-${task.id}`,
+      data: { task, column },
+    });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      <TaskCard task={task} />
+    </div>
+  );
+}
+
+interface TaskCardProps {
+  task: Task;
+}
+
+function TaskCard({ task }: TaskCardProps) {
+  return (
+    <div className="bg-white p-3 rounded-lg shadow-sm mb-3">
+      <h4 className="font-medium mb-2">{task.title}</h4>
+      <div className="flex justify-between items-end">
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-1 bg-gray-100 rounded">
+            {task.type}
+          </span>
+          <PriorityIndicator priority={task.priority} />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={task.assignee.image} />
+          <AvatarFallback>{task.assignee.name}</AvatarFallback>
+        </Avatar>
+      </div>
+    </div>
+  );
+}
+
+interface PriorityIndicatorProps {
+  priority: "low" | "medium" | "high";
+}
+
+function PriorityIndicator({ priority }: PriorityIndicatorProps) {
+  const bars = {
+    low: ["bg-gray-600", "bg-gray-300", "bg-gray-300"],
+    medium: ["bg-gray-600", "bg-gray-600", "bg-gray-300"],
+    high: ["bg-gray-600", "bg-gray-600", "bg-gray-600"],
+  };
+
+  return (
+    <div className="flex gap-0.5 items-end h-4">
+      {bars[priority].map((bg, i) => (
+        <div
+          key={i}
+          className={`w-1 ${bg} rounded-sm`}
+          style={{ height: `${(i + 1) * 4}px` }}
+        />
+      ))}
     </div>
   );
 }

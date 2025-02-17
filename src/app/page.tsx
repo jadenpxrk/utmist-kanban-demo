@@ -112,9 +112,24 @@ export default function KanbanBoard() {
     { id: 4, name: "Jaden Park", image: "/avatars/04.png" },
     { id: 5, name: "Tom Zhang", image: "/avatars/05.png" },
   ];
+  const dummyPeople = [
+    { id: 1, name: "John Doe", email: "john@example.com" },
+    { id: 2, name: "Alice Smith", email: "alice@example.com" },
+    { id: 3, name: "Robert King", email: "robert@example.com" },
+    { id: 4, name: "Mary Johnson", email: "mary@example.com" },
+    { id: 5, name: "James Brown", email: "james@example.com" },
+  ];
   const [assigneeSearch, setAssigneeSearch] = useState("");
   const filteredAssignees = placeholderAssignees.filter((assignee) =>
     assignee.name.toLowerCase().includes(assigneeSearch.toLowerCase())
+  );
+
+  // NEW: Add peopleSearch state and filteredPeople filter
+  const [peopleSearch, setPeopleSearch] = useState("");
+  const filteredPeople = dummyPeople.filter(
+    (person) =>
+      person.name.toLowerCase().includes(peopleSearch.toLowerCase()) ||
+      person.email.toLowerCase().includes(peopleSearch.toLowerCase())
   );
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -175,18 +190,6 @@ export default function KanbanBoard() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <Input className="pl-9" placeholder="Search issues..." />
             </div>
-            <Select>
-              <SelectTrigger className="w-[140px]">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-[#0133a0] hover:bg-[#0133a0]/90">
@@ -318,6 +321,72 @@ export default function KanbanBoard() {
                     >
                       Submit
                     </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Select>
+              <SelectTrigger className="w-[140px]">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="hover:bg-gray-100">
+                  Share Project
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-full max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Share Project</DialogTitle>
+                </DialogHeader>
+                <form className="space-y-4">
+                  <div className="w-full flex flex-col justify-center items-start gap-2">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Invite by Email
+                    </Label>
+                    <div className="w-full flex flex-row justify-center items-center gap-2">
+                      <Input placeholder="Enter email address" />
+                      <Button
+                        type="submit"
+                        className="bg-[#0133a0] hover:bg-[#0133a0]/90"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700">
+                      People with Access
+                    </Label>
+                    <div className="relative w-full mt-1">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                      <Input
+                        placeholder="Search people..."
+                        value={peopleSearch}
+                        onChange={(e) => setPeopleSearch(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                    <ScrollArea className="h-40 mt-2">
+                      <div className="flex flex-col gap-2">
+                        {filteredPeople.map((person) => (
+                          <div key={person.id} className="p-2 border rounded">
+                            <div className="font-medium">{person.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {person.email}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   </div>
                 </form>
               </DialogContent>

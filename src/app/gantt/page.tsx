@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/base/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator";
 import { ModeToggle } from "@/components/base/mode-toggle";
 
@@ -68,8 +69,8 @@ const initialTasks: Task[] = [
           image: "/avatars/03.png",
           name: "RK",
         }],
-        start: new Date("2025-04-10"),
-        end: new Date("2025-04-12"),
+        start: new Date("2025-04-12"),
+        end: new Date("2025-04-15"),
       },
       {
         id: 4,
@@ -110,7 +111,12 @@ const initialTasks: Task[] = [
     ]
 
 export default function GanttPage() {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const [tasks, setTasks] = useState<Task[]>([]);
+
+    useEffect(() => {
+        const sortedTasks = initialTasks.sort((a, b) => a.start.getTime() - b.start.getTime());
+        setTasks(sortedTasks);
+    }, []);
     
     return (
         <SidebarProvider>
@@ -146,8 +152,9 @@ export default function GanttPage() {
 function GanttChart({ tasks }: { tasks: Task[] }) {
     const activeMonths = tasks.reduce((months, task) => {
         const startMonth = task.start.getMonth();
-        const endMonth = task.end.getMonth();
+        const endMonth = task.end.getMonth() - 1;
         for (let month = startMonth; month <= endMonth; month++) {
+            console.log(month);
             if (!months.includes(month)) {
                 months.push(month);
             }
@@ -162,80 +169,74 @@ function GanttChart({ tasks }: { tasks: Task[] }) {
 
 
     return (
-        <div className="relative h-full w-full">
-            <div className="grid grid-cols-[auto_1fr] grid-rows-[4rem_1fr] h-full w-full">
-                {/* Top Left: Empty */}
-                <div></div>
+        <ScrollArea className="max-w-[90%]">
+            <div className="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr] gap-y-2">
+            <div></div>
 
-                {/* Top Right: Date Timeline */}
-                <div className="flex flex-col gap-2">
-                    {/* Top Right: Month Timeline */}
-                    <div className="flex">
-                        {activeMonths.map(month => (
-                            <div key={month} className="text-sm bg-gray-200 mr-2 text-center rounded" style={{ width: `${numberOfDays[activeMonths.indexOf(month)]}rem` }}>
-                                {new Date(2025, month + 1).toLocaleString("default", { month: "long" })}
-                            </div>
-                        ))}
+            <div className="flex flex-col gap-2">
+                <div className="flex">
+                {activeMonths.map(month => (
+                    <div key={month} className="text-sm bg-gray-200 mr-2 text-center rounded" style={{ width: `${numberOfDays[activeMonths.indexOf(month)]}rem` }}>
+                    {new Date(2025, month + 1).toLocaleString("default", { month: "long" })}
                     </div>
+                ))}
+                </div>
+                <div className="flex justify-between">
+                {Array.from({ length: numberOfWeeksTotal }).map((_, index) => {
+                    const weekStart = new Date(startDate);
+                    weekStart.setDate(startDate.getDate() + index * 7);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
 
-                    {/* Top Right: Date Timeline */}
-                    <div className="flex justify-between">
-                        {Array.from({ length: numberOfWeeksTotal }).map((_, index) => {
-                            const weekStart = new Date(startDate);
-                            weekStart.setDate(startDate.getDate() + index * 7);
-                            const weekEnd = new Date(weekStart);
-                            weekEnd.setDate(weekStart.getDate() + 6);
-
-                            return (
-                                <div key={index} className="text-sm w-[7rem] bg-gray-200 mr-2 rounded text-center">
-                                    {`${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${weekEnd.getDate()}/${weekEnd.getMonth() + 1}`}
-                                </div>
-                            );
-                        })}
+                    return (
+                    <div key={index} className="text-sm w-[7rem] bg-gray-200 mr-2 rounded text-center">
+                        {`${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${weekEnd.getDate()}/${weekEnd.getMonth() + 1}`}
                     </div>
-                </div>
-
-                {/* Bottom Left: Task Names */}
-                <div className="flex flex-col gap-2 px-4">
-                    {tasks.map(task => (
-                        <div key={task.id} className="text-sm whitespace-nowrap">
-                            {task.title}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Bottom Right: Task Bars */}
-                <div className="flex flex-col gap-2">
-                    {tasks.map(task => {
-                        const start = (task.start.getTime() - new Date(2025, 3, 1).getTime()) / (1000 * 60 * 60 * 24);
-                        const end = (task.end.getTime() - new Date(2025, 3, 1).getTime()) / (1000 * 60 * 60 * 24);
-                        return (
-                            <div
-                                key={task.id}
-                                className="relative bg-blue-500 h-6 rounded"
-                                style={{
-                                    marginLeft: `${start}rem`,
-                                    width: `${(end - start)}rem`,
-                                }}
-                            >
-                                {Array.isArray(task.assignee) && task.assignee.map((assignee, i) => (
-                                    <img
-                                        key={i}
-                                        src={assignee.image}
-                                        alt={assignee.name}
-                                        className="absolute top-0 left-0 w-6 h-6 rounded-full border-2 border-white"
-                                        style={{
-                                            transform: `translate(0%, -50%)`,
-                                            top: `50%`,
-                                            left: `${i * 10}px`,
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        );
-                    })}
+                    );
+                })}
                 </div>
             </div>
-        </div>
+
+            <div className="flex flex-col gap-2 px-4">
+                {tasks.map(task => (
+                <div key={task.id} className="text-sm whitespace-nowrap">
+                    {task.title}
+                </div>
+                ))}
+            </div>
+
+            <div className="flex flex-col gap-2">
+                {tasks.map(task => {
+                const start = (task.start.getTime() - new Date(2025, 3, 1).getTime()) / (1000 * 60 * 60 * 24);
+                const end = (task.end.getTime() - new Date(2025, 3, 1).getTime()) / (1000 * 60 * 60 * 24);
+                return (
+                    <div
+                    key={task.id}
+                    className="relative bg-blue-500 h-6 rounded"
+                    style={{
+                        marginLeft: `${start}rem`,
+                        width: `${(end - start)}rem`,
+                    }}
+                    >
+                    {Array.isArray(task.assignee) && task.assignee.map((assignee, i) => (
+                        <img
+                        key={i}
+                        src={assignee.image}
+                        alt={assignee.name}
+                        className="absolute top-0 left-0 w-6 h-6 rounded-full border-2 border-white"
+                        style={{
+                            transform: `translate(0%, -50%)`,
+                            top: `50%`,
+                            left: `${i * 10}px`,
+                        }}
+                        />
+                    ))}
+                    </div>
+                );
+                })}
+            </div>
+            </div>
+            <ScrollBar orientation="horizontal" />
+        </ScrollArea>
     );
 }

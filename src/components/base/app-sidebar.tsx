@@ -70,12 +70,12 @@ const data = {
   projects: [
     {
       name: "Kanban Board Implementation",
-      url: "#",
+      url: "/",
       icon: Frame,
     },
     {
       name: "Gantt Chart Implementation",
-      url: "#",
+      url: "/gantt",
       icon: PieChart,
     },
     {

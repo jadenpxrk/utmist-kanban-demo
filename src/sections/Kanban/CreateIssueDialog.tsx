@@ -1,4 +1,4 @@
-import * as React from "react";
+"use client";
 
 import {
   Dialog,
@@ -17,28 +17,21 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@radix-ui/react-dropdown-menu";
+import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-
-const placeholderAssignees = [
-  { id: 1, name: "John Doe", image: "/avatars/01.png" },
-  { id: 2, name: "Alice Smith", image: "/avatars/02.png" },
-  { id: 3, name: "Robert King", image: "/avatars/03.png" },
-  { id: 4, name: "Jaden Park", image: "/avatars/04.png" },
-  { id: 5, name: "Tom Zhang", image: "/avatars/05.png" },
-];
+import { useSearch } from "@/hooks/use-search";
 
 export function CreateIssueDialog() {
-  const [selectedAssignees, setSelectedAssignees] = useState<
-    Array<{ id: number; name: string; image: string }>
-  >([]);
-  const [assigneeSearch, setAssigneeSearch] = useState("");
-
-  const filteredAssignees = placeholderAssignees.filter((assignee) =>
-    assignee.name.toLowerCase().includes(assigneeSearch.toLowerCase())
-  );
+  const {
+    selectedAssignees,
+    assigneeSearch,
+    setAssigneeSearch,
+    filteredAssignees,
+    toggleAssignee,
+  } = useSearch();
 
   return (
     <Dialog>
@@ -54,12 +47,12 @@ export function CreateIssueDialog() {
             {/* Left Column: Title and Description */}
             <div className="flex flex-col h-full gap-4">
               <div>
-                <label
-                  htmlFor="issueTitle"
+                <Label
+                  id="issueTitle"
                   className="block text-sm font-medium text-foreground"
                 >
                   Issue Title
-                </label>
+                </Label>
                 <Input
                   id="issueTitle"
                   placeholder="Enter issue title"
@@ -67,12 +60,12 @@ export function CreateIssueDialog() {
                 />
               </div>
               <div className="flex-1 flex flex-col">
-                <label
-                  htmlFor="issueDescription"
+                <Label
+                  id="issueDescription"
                   className="block text-sm font-medium text-foreground"
                 >
                   Description
-                </label>
+                </Label>
                 <Textarea
                   id="issueDescription"
                   placeholder="Enter issue description"
@@ -83,12 +76,12 @@ export function CreateIssueDialog() {
             {/* Right Column: Priority, Assignees, and Date */}
             <div className="space-y-4">
               <div>
-                <label
-                  htmlFor="issuePriority"
+                <Label
+                  id="issuePriority"
                   className="block text-sm font-medium text-foreground"
                 >
                   Priority
-                </label>
+                </Label>
                 <Select>
                   <SelectTrigger id="issuePriority" className="mt-1">
                     <SelectValue placeholder="Select priority" />
@@ -101,9 +94,9 @@ export function CreateIssueDialog() {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground">
+                <Label className="block text-sm font-medium text-foreground">
                   Assignees
-                </label>
+                </Label>
                 <div className="relative w-full mt-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -118,25 +111,10 @@ export function CreateIssueDialog() {
                     {filteredAssignees.map((assignee) => (
                       <div
                         key={assignee.id}
-                        onClick={() => {
-                          if (
-                            selectedAssignees.some((a) => a.id === assignee.id)
-                          ) {
-                            setSelectedAssignees(
-                              selectedAssignees.filter(
-                                (a) => a.id !== assignee.id
-                              )
-                            );
-                          } else {
-                            setSelectedAssignees([
-                              ...selectedAssignees,
-                              assignee,
-                            ]);
-                          }
-                        }}
+                        onClick={() => toggleAssignee(assignee)}
                         className={`cursor-pointer p-2 rounded border ${
                           selectedAssignees.some((a) => a.id === assignee.id)
-                            ? "border-utmist bg-blue-100 text-utmist"
+                            ? "border-utmist bg-utmist-accent text-utmist"
                             : "border-muted-foreground"
                         }`}
                       >

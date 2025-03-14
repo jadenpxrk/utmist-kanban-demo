@@ -10,7 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import { ModeToggle } from "@/components/base/Sidebar/mode-toggle";
+import { ModeToggle } from "@/components/common/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
@@ -20,20 +20,17 @@ interface PathSegment {
   href: string;
 }
 
-export function PageHeader() {
+export function Header() {
   const pathname = usePathname();
 
-  // Generate breadcrumb items based on the current path
   const getBreadcrumbs = (): PathSegment[] => {
-    // Skip the first empty string
     const segments = pathname.split("/").filter(Boolean);
 
-    // Create breadcrumb segments with proper href paths
     return segments.map((segment, index) => {
-      // Build the href path for this segment
+      // first segment
       const href = `/${segments.slice(0, index + 1).join("/")}`;
 
-      // Format the display name (capitalize first letter)
+      // formatting
       const name = segment.charAt(0).toUpperCase() + segment.slice(1);
 
       return { name, href };

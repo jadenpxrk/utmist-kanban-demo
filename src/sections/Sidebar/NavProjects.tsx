@@ -30,7 +30,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "../../ui/collapsible";
+} from "../../components/ui/collapsible";
 
 export function NavProjects({
   projects,

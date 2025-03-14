@@ -58,7 +58,7 @@ export function GanttChart() {
     if (chartData.length === 0) return [0, 0];
     const min = Math.min(...chartData.map((d) => d.x));
     const max = Math.max(...chartData.map((d) => d.z));
-    // Add some padding to make the chart more readable
+    // add padding
     return [min - 1000 * 60 * 60 * 24, max + 1000 * 60 * 60 * 24];
   }, [chartData]);
 
@@ -131,77 +131,88 @@ export function GanttChart() {
   }, [chartData, xDomain]);
 
   return (
-    <Card className="w-full h-full flex flex-col">
-      <CardContent className="w-full h-full">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-full w-full"
-          enableScroll={true}
-          contentWidth={contentWidth}
-          contentHeight={`600px`}
-        >
-          <ScatterChart
-            data={chartData}
-            margin={{ top: 30, right: 0, left: 0, bottom: 10 }}
-            height={800}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              type="number"
-              dataKey="x"
-              domain={xDomain}
-              ticks={generateTicks()}
-              tickFormatter={formatXAxis}
-              padding={{ left: 0, right: 0 }}
-              style={{ userSelect: "none" }}
-              height={20}
-              tickMargin={5}
-              allowDataOverflow={false}
-              scale="time"
-            />
-            <XAxis
-              type="number"
-              dataKey="x"
-              domain={xDomain}
-              ticks={generateMonthTicks()}
-              tickFormatter={formatMonthTick}
-              padding={{ left: 0, right: 0 }}
-              style={{ userSelect: "none" }}
-              height={20}
-              tickMargin={5}
-              xAxisId="month"
-              orientation="top"
-              scale="time"
-              interval={0}
-            />
-            <YAxis
-              hide
-              type="number"
-              dataKey="y"
-              name="weight"
-              domain={yDomain}
-              style={{ userSelect: "none" }}
-            />
-            <ChartTooltip
-              content={<CustomTooltip />}
-              cursor={{ strokeDasharray: "3 3", opacity: 0.3 }}
-              wrapperStyle={{ zIndex: 100 }}
-            />
-            <Scatter
-              data={chartData}
-              fill="hsl(var(--chart-1))"
-              shape={(props: unknown) => (
-                <CustomBar {...(props as CustomBarProps)} />
-              )}
-              dataKey="x"
-              isAnimationActive={false}
-              line={false}
-              legendType="none"
-            />
-          </ScatterChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+    <main className="h-full w-full p-6 flex flex-col">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Gantt Chart</h1>
+        <p className="text-muted-foreground">
+          View and manage project timeline
+        </p>
+      </div>
+
+      <div className="flex-1 overflow-hidden">
+        <Card className="w-full h-full flex flex-col">
+          <CardContent className="w-full h-full">
+            <ChartContainer
+              config={chartConfig}
+              className="aspect-auto h-full w-full"
+              enableScroll={true}
+              contentWidth={contentWidth}
+              contentHeight={`600px`}
+            >
+              <ScatterChart
+                data={chartData}
+                margin={{ top: 30, right: 0, left: 0, bottom: 10 }}
+                height={800}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  type="number"
+                  dataKey="x"
+                  domain={xDomain}
+                  ticks={generateTicks()}
+                  tickFormatter={formatXAxis}
+                  padding={{ left: 0, right: 0 }}
+                  style={{ userSelect: "none" }}
+                  height={20}
+                  tickMargin={5}
+                  allowDataOverflow={false}
+                  scale="time"
+                />
+                <XAxis
+                  type="number"
+                  dataKey="x"
+                  domain={xDomain}
+                  ticks={generateMonthTicks()}
+                  tickFormatter={formatMonthTick}
+                  padding={{ left: 0, right: 0 }}
+                  style={{ userSelect: "none" }}
+                  height={20}
+                  tickMargin={5}
+                  xAxisId="month"
+                  orientation="top"
+                  scale="time"
+                  interval={0}
+                />
+                <YAxis
+                  hide
+                  type="number"
+                  dataKey="y"
+                  name="weight"
+                  domain={yDomain}
+                  style={{ userSelect: "none" }}
+                />
+                <ChartTooltip
+                  content={<CustomTooltip />}
+                  cursor={{ strokeDasharray: "3 3", opacity: 0.3 }}
+                  wrapperStyle={{ zIndex: 100 }}
+                />
+                <Scatter
+                  data={chartData}
+                  fill="hsl(var(--chart-1))"
+                  shape={(props: unknown) => (
+                    <CustomBar {...(props as CustomBarProps)} />
+                  )}
+                  dataKey="x"
+                  isAnimationActive={false}
+                  line={false}
+                  legendType="none"
+                />
+              </ScatterChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
   );
 }
 
@@ -237,15 +248,11 @@ const CustomBar = ({ cy, fill, payload, xAxis }: CustomBarProps) => {
   const normalizedStartDate = normalizeToDay(payload.x);
   const normalizedEndDate = normalizeToDay(payload.z);
 
-  // Calculate the day after the end date to ensure inclusive range
-  const endDatePlusOne = new Date(normalizedEndDate);
-  endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
-
   // Calculate exact start and end positions
   const startX = calculateBarPosition(normalizedStartDate, xAxis);
-  const endX = calculateBarPosition(endDatePlusOne.valueOf(), xAxis);
+  const endX = calculateBarPosition(normalizedEndDate, xAxis);
 
-  // Ensure bar has appropriate width
+  // Calculate bar width without extra padding to prevent overflow
   const barWidth = Math.max(endX - startX, 2);
   const barHeight = 25;
 

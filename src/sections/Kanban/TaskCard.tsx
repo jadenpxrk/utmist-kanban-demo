@@ -1,35 +1,9 @@
-import * as React from "react";
+"use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PriorityIndicatorProps, TaskCardProps } from "./types";
 
-function PriorityIndicator({ priority }: PriorityIndicatorProps) {
-  const bars = {
-    low: ["bg-accent-foreground", "bg-muted-foreground", "bg-muted-foreground"],
-    medium: [
-      "bg-accent-foreground",
-      "bg-accent-foreground",
-      "bg-muted-foreground",
-    ],
-    high: [
-      "bg-accent-foreground",
-      "bg-accent-foreground",
-      "bg-accent-foreground",
-    ],
-  };
-
-  return (
-    <div className="flex gap-0.5 items-end h-4">
-      {bars[priority].map((bg, i) => (
-        <div
-          key={i}
-          className={`w-1 ${bg} rounded-sm`}
-          style={{ height: `${(i + 1) * 4}px` }}
-        />
-      ))}
-    </div>
-  );
-}
+import { PriorityIndicator } from "./PriorityIndicator";
+import { TaskCardProps } from "@/types/kanban";
 
 export function TaskCard({ task }: TaskCardProps) {
   return (

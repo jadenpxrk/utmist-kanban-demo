@@ -127,7 +127,7 @@ export function Settings() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="flex flex-col gap-6 items-start">
               <div className="flex flex-col items-center space-y-4">
                 <Avatar>
                   <AvatarImage src={profile.avatarUrl} alt={profile.name} />

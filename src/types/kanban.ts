@@ -33,3 +33,15 @@ export interface TaskCardProps {
 export interface PriorityIndicatorProps {
   priority: "low" | "medium" | "high";
 }
+
+export interface Assignee {
+  id: number;
+  name: string;
+  image: string;
+}
+
+export interface Person {
+  id: number;
+  name: string;
+  email: string;
+}

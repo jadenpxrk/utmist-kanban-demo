@@ -22,8 +22,9 @@ export function PriorityIndicator({ priority }: PriorityIndicatorProps) {
       {bars[priority].map((bg, i) => (
         <div
           key={i}
-          className={`w-1 ${bg} rounded-sm`}
-          style={{ height: `${(i + 1) * 4}px` }}
+          className={`w-1 ${bg} rounded-sm ${
+            i === 0 ? "h-1" : i === 1 ? "h-2" : "h-3"
+          }`}
         />
       ))}
     </div>

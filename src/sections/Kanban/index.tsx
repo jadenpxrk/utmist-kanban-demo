@@ -40,8 +40,8 @@ export default function Kanban() {
   const sensors = useSensors(useSensor(PointerSensor));
 
   return (
-    <main className="h-full w-full p-6">
-      <header className="mb-6">
+    <div className="flex flex-col gap-6">
+      <header>
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">Kanban Board</h1>
           <div className="flex items-center gap-2 bg-utmist-accent px-3 py-1 rounded-md">
@@ -51,7 +51,7 @@ export default function Kanban() {
         </div>
       </header>
 
-      <div className="mb-6 flex justify-between items-center gap-4">
+      <div className="flex justify-between items-center gap-4">
         <div className="relative min-w-[300px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input className="pl-9" placeholder="Search issues..." />
@@ -98,6 +98,6 @@ export default function Kanban() {
           </DndContext>
         </ClientOnly>
       </div>
-    </main>
+    </div>
   );
 }

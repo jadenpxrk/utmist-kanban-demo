@@ -10,8 +10,7 @@ export function DroppableColumn({ id, title, tasks }: DroppableColumnProps) {
   return (
     <div
       ref={setNodeRef}
-      className="bg-sidebar rounded-lg p-4 flex flex-col"
-      style={{ height: "100%" }}
+      className="bg-sidebar border-sidebar rounded-lg p-4 flex flex-col h-full"
     >
       <h3 className="font-semibold mb-4">{title}</h3>
       <ScrollArea className="flex-1">

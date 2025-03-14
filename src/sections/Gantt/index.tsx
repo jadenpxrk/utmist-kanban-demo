@@ -131,7 +131,7 @@ export function GanttChart() {
   }, [chartData, xDomain]);
 
   return (
-    <main className="h-full w-full p-6 flex flex-col">
+    <div className="flex flex-col">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Gantt Chart</h1>
         <p className="text-muted-foreground">
@@ -212,7 +212,7 @@ export function GanttChart() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </div>
   );
 }
 

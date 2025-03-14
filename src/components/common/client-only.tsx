@@ -6,9 +6,7 @@ interface ClientOnlyProps {
   children: ReactNode;
 }
 
-/**
- *  prevent hydration errors that depend on client-side APIs
- */
+// prevent hydration errors that depend on client-side APIs
 export function ClientOnly({ children }: ClientOnlyProps) {
   const [isMounted, setIsMounted] = useState(false);
 

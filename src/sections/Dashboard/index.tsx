@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function Dashboard() {
   return (
-    <main className="h-full w-full p-6">
+    <>
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Project Dashboard</h1>
@@ -148,6 +148,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </>
   );
 }

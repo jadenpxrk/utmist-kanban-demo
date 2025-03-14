@@ -4,12 +4,13 @@ import * as React from "react";
 
 import {
   AudioWaveform,
+  Briefcase,
+  Code,
   Command,
+  FileText,
   Frame,
   GalleryVerticalEnd,
-  GitBranch,
   LayoutDashboard,
-  Map,
   PieChart,
   Settings,
 } from "lucide-react";
@@ -52,36 +53,41 @@ const data = {
   ],
   navMain: [
     {
-      title: "Board",
-      url: "/board",
+      title: "Dashboard",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Roadmap",
-      url: "/roadmap",
-      icon: GitBranch,
+      title: "Kanban Board",
+      url: "/dashboard/kanban",
+      icon: Frame,
+    },
+    {
+      title: "Gantt Chart",
+      url: "/dashboard/gantt",
+      icon: PieChart,
     },
     {
       title: "Settings",
-      url: "/settings",
+      url: "/dashboard/settings",
       icon: Settings,
     },
   ],
   projects: [
     {
-      name: "Kanban Board Implementation",
-      url: "/",
-      icon: Frame,
-    },
-    {
-      name: "Gantt Chart Implementation",
-      url: "/gantt",
-      icon: PieChart,
-    },
-    {
-      name: "Other Stuff",
+      name: "Frontend Redesign",
       url: "#",
-      icon: Map,
+      icon: Code,
+    },
+    {
+      name: "Backend API Development",
+      url: "#",
+      icon: Briefcase,
+    },
+    {
+      name: "Documentation Project",
+      url: "#",
+      icon: FileText,
     },
   ],
 };

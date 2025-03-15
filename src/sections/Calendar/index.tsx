@@ -219,9 +219,9 @@ export default function Calendar() {
       </div>
       <div
         ref={calendarRef}
-        className="mt-2 z-10 w-full calendar flex-grow relative overflow-hidden flex flex-col gap-[1px] bg-accent p-[2px]"
+        className="mt-2 z-10 w-full calendar flex-grow relative overflow-hidden flex flex-col gap-[1px] bg-accent p-[1px]"
       >
-        <div className="w-full gap-[1px] grid grid-cols-7 mb-[1px] overflow-hidden">
+        <div className="w-full gap-[1px] grid grid-cols-7 overflow-hidden">
           {weekDays.map((day) => (
             <div
               key={day}

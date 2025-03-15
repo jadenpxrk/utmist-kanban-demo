@@ -53,15 +53,13 @@ export default function DateSelect({
 
   return (
     <div className="w-full flex flex-row items-center justify-between gap-4">
-      <div className="flex flex-row items-center gap-4">
-        <div className="text-xl font-bold">
-          {months[month - 1]} {year}
-        </div>
-        <Button variant="ghost" onClick={handleToday}>
+      <div className="text-xl font-bold">
+        {months[month - 1]} {year}
+      </div>
+      <div className="flex flex-row items-center gap-3">
+        <Button variant="link" onClick={handleToday}>
           Today
         </Button>
-      </div>
-      <div className="flex flex-row items-center gap-4">
         <Button onClick={handleMinus} size="icon" variant="ghost">
           <ChevronLeft className="h-5 w-5" />
         </Button>

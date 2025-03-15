@@ -5,6 +5,7 @@ import * as React from "react";
 import {
   AudioWaveform,
   Briefcase,
+  Calendar,
   Code,
   Command,
   FileText,
@@ -56,6 +57,11 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      title: "Calendar",
+      url: "/dashboard/calendar",
+      icon: Calendar,
     },
     {
       title: "Kanban Board",

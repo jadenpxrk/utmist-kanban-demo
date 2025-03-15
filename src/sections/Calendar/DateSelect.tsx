@@ -53,7 +53,7 @@ export default function DateSelect({
 
   return (
     <div className="w-full flex flex-row items-center justify-between gap-4">
-      <div className="text-xl font-bold">
+      <div className="text-2xl font-bold">
         {months[month - 1]} {year}
       </div>
       <div className="flex flex-row items-center gap-3">

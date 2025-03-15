@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { User } from "lucide-react";
 
 // types
@@ -93,7 +94,7 @@ export function TaskListModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[525px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>
             Tasks for {formatDate(date.day, date.month, date.year)}
@@ -107,27 +108,29 @@ export function TaskListModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 space-y-3">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="flex items-start p-3 rounded-md border border-border bg-card"
-            >
+        <ScrollArea className="mt-4 max-h-[350px]">
+          <div className="space-y-3 px-1">
+            {tasks.map((task) => (
               <div
-                className={`w-2 h-full min-h-[2.5rem] rounded-full mr-3 ${
-                  labelColors[task.label]
-                }`}
-              ></div>
-              <div className="flex-1">
-                <div className="font-medium">{task.text}</div>
-                <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                  <User className="h-3.5 w-3.5 mr-1.5" />
-                  <span>{getAssigneeNames(task.assignees)}</span>
+                key={task.id}
+                className="flex items-start p-3 rounded-md border border-border bg-card w-full mx-auto"
+              >
+                <div
+                  className={`w-2 h-full min-h-[2.5rem] rounded-full mr-3 ${
+                    labelColors[task.label]
+                  }`}
+                ></div>
+                <div className="flex-1">
+                  <div className="font-medium">{task.text}</div>
+                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                    <User className="h-3.5 w-3.5 mr-1.5" />
+                    <span>{getAssigneeNames(task.assignees)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

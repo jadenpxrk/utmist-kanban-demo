@@ -1,5 +1,14 @@
 "use client";
 
+import { CheckIcon, ChevronDown, PlusCircle, User, XIcon } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +17,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PlusCircle, User } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -19,9 +32,127 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+
+// A custom solution that reimplements just enough of the MultiSelect to avoid the nesting issue
+function AssigneeSelector({
+  options,
+  onValueChange,
+  defaultValue = [],
+  placeholder = "Select assignees...",
+}: {
+  options: {
+    label: string;
+    value: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[];
+  onValueChange: (value: string[]) => void;
+  defaultValue?: string[];
+  placeholder?: string;
+}) {
+  const [selectedValues, setSelectedValues] = useState<string[]>(defaultValue);
+  const [open, setOpen] = useState(false);
+
+  const handleSelect = (value: string) => {
+    const newSelectedValues = selectedValues.includes(value)
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value];
+
+    setSelectedValues(newSelectedValues);
+    onValueChange(newSelectedValues);
+  };
+
+  const handleSelectAll = () => {
+    const allValues = options.map((option) => option.value);
+    setSelectedValues(allValues);
+    onValueChange(allValues);
+  };
+
+  const handleClearAll = () => {
+    setSelectedValues([]);
+    onValueChange([]);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div className="flex w-full px-3 py-2 rounded-md border min-h-10 h-auto items-center justify-between bg-background hover:bg-background/80 cursor-pointer">
+          {selectedValues.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {selectedValues.map((value) => {
+                const option = options.find((o) => o.value === value);
+                const Icon = option?.icon;
+                return (
+                  <div
+                    key={value}
+                    className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md flex items-center text-xs"
+                  >
+                    {Icon && <Icon className="mr-1 h-3 w-3" />}
+                    {option?.label}
+                    <XIcon
+                      className="ml-1 h-3 w-3 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelect(value);
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <span className="text-muted-foreground text-sm">{placeholder}</span>
+          )}
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search assignees..." className="text-sm" />
+          <div className="flex w-full border-b">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-8 flex-1 justify-center rounded-none border-r hover:bg-accent"
+              onClick={handleSelectAll}
+            >
+              Select All
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs h-8 flex-1 justify-center rounded-none hover:bg-accent"
+              onClick={handleClearAll}
+            >
+              Clear
+            </Button>
+          </div>
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => {
+                const isSelected = selectedValues.includes(option.value);
+                const Icon = option.icon;
+                return (
+                  <CommandItem
+                    key={option.value}
+                    onSelect={() => handleSelect(option.value)}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                    <span>{option.label}</span>
+                    {isSelected && <CheckIcon className="h-4 w-4 ml-auto" />}
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 interface Assignee {
   id: string;
@@ -228,10 +359,9 @@ export function TaskDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="assignees">Assignees</Label>
-              <MultiSelect
+              <AssigneeSelector
                 options={assigneeOptions}
                 onValueChange={setAssigneeIds}
-                placeholder="Select assignees..."
                 defaultValue={[]}
               />
             </div>
